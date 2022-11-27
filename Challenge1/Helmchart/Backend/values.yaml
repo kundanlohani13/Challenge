@@ -1,0 +1,44 @@
+# Default values for admin-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+    name: backend-service
+    namespace: apple
+    labels:
+      app: backend-service
+spec:   
+   name: backend-svc
+   selector:
+      app: backend-service
+   serviceAccountName: dev-backend
+   replicas: 1
+   template:
+      annotations:
+        timestamp: 20200526_065337
+   terminationGracePeriodSeconds: 10
+   containers:
+        name: backend
+        volumeMounts:
+           name: backend-log-vol
+           mountPath: /var/log
+   
+   resources:
+      limits:
+         memory: 1792Mi
+         cpu: 0
+      requests:
+         memory: 1024Mi
+         cpu: 0
+   image:
+      name: gcr.io/skilled-mile-364907/backend
+      tag: latest
+ports:
+  containerPort: 8282
+  port: 8281
+  name: admin-svc 
+volumes:
+  name: admin-service-log-vol
+  hostPath:
+      path: /var/log
+
