@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.component }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.app }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app }}
+  template:
+    metadata:
+      name: {{ .Values.component }}
+      namespace: {{ .Values.namespace }}
+      labels:
+        app: {{ .Values.app }}
+      annotations:
+        timestamp: "{{ .Values.spec.template.annotations.timestamp }}"  
+    spec:
+      tolerations:
+      - key: {{ .Values.tolerations.key }}
+        operator: {{ .Values.tolerations.operator }}
+        value: {{ .Values.tolerations.value }}
+        effect: {{ .Values.tolerations.effect }}    
+      topologySpreadConstraints:
+      - labelSelector:
+          matchLabels:
+            app: {{ .Values.app }}
+        maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+      - labelSelector:
+          matchLabels:
+            app: {{ .Values.app }}
+        maxSkew: 2
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: DoNotSchedule
+      
+      terminationGracePeriodSeconds: 120
+      containers:
+      - name: {{ .Values.component }}
+        env:
+          - name: GCP_PROJECT_ID
+            value: {{ .Values.env.GCP_PROJECT_ID }}
+          - name: image_pointer
+            value: "{{ .Values.env.image_pointer }}:{{ .Values.env.image.tag }}"
+        imagePullPolicy: Always
+        image: "{{ .Values.env.image.name }}:{{ .Values.env.image.tag }}"
+        ports:
+        - containerPort: 80
+          name: www
+        volumeMounts:
+        - name: nginx-log-vol
+          mountPath: /var/log/nginx
+        resources:
+          limits:
+            memory: {{ .Values.resources.limits.memory }}
+            cpu: {{ .Values.resources.limits.cpu }}
+          requests:
+            memory: {{ .Values.resources.requests.memory }}
+            cpu: {{ .Values.resources.requests.cpu }}
+      volumes:
+      - name: nginx-log-vol
+        hostPath:
+          path: /var/log

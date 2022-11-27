@@ -1,0 +1,36 @@
+# Default values for nginx.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: dev
+app: nginx
+replicaCount: 2
+component: nginx-deployment
+terminationGracePeriodSeconds: 10
+spec:
+  template:
+      annotations:
+        timestamp: 20200526_065337
+
+service:
+  port: 80
+  type: LoadBalancer
+
+env:
+  PENV: dev
+  APP_SVC: nginx2
+  GCP_PROJECT_ID: skilled-mile-364907
+  image:
+    name: gcr.io/skilled-mile-364907/nginx-1.17
+    tag: latest
+  image_pointer: gcr.io/skilled-mile-364907/nginx-1.17
+
+resources:
+  limits:
+    memory: 512Mi
+    cpu: 10m
+  requests:
+    memory: 256Mi
+    cpu: 30m
+
+
