@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.metadata.name }} 
+  namespace: {{ .Values.metadata.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.spec.selector.app }} # has to match .spec.template.metadata.labels
+  replicas: {{ .Values.spec.replicas }}  # by default is 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.spec.selector.app }} # has to match .spec.selector.matchLabels
+      annotations:
+        timestamp: "{{ .Values.spec.template.annotations.timestamp }}"  
+    spec:
+      serviceAccountName: {{ .Values.spec.serviceAccountName }}
+      terminationGracePeriodSeconds: {{ .Values.spec.terminationGracePeriodSeconds }}
+      containers:
+      - name: {{ .Values.spec.containers.name }}
+        env:
+        - name: image_pointer
+          value: "{{ .Values.spec.image.name }}:{{ .Values.spec.image.tag }}"
+        
+        resources:
+          limits:
+            memory: {{ .Values.spec.resources.limits.memory }}
+            cpu: {{ .Values.spec.resources.limits.cpu }}
+          requests:
+            memory: {{ .Values.spec.resources.requests.memory }}
+            cpu: {{ .Values.spec.resources.requests.cpu }}
+        
+        image: "{{ .Values.spec.image.name }}:{{ .Values.spec.image.tag }}"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.ports.containerPort }}
+          name: {{ .Values.ports.name }}
+        volumeMounts:
+        - name: {{ .Values.spec.containers.volumeMounts.name }}
+          mountPath: {{ .Values.spec.containers.volumeMounts.mountPath }}
+       
+      volumes:
+      - name: {{ .Values.volumes.name }}
+        hostPath:
+          path: {{ .Values.volumes.hostPath.path }}
+      
